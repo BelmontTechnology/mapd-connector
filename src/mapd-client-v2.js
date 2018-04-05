@@ -65,6 +65,11 @@ MapDClientV2.prototype.get_tables = function (...args) {
   return getTablesWithErrorHandling(...args)
 }
 
+MapDClientV2.prototype.get_tables_meta = function (...args) {
+  const getTablesWithMetaWithErrorHandling = wrapWithErrorHandling(this, "get_tables_meta")
+  return getTablesWithMetaWithErrorHandling(...args)
+}
+
 MapDClientV2.prototype.get_table_details = function(...args) {
   const getTableDetailsWithErrorHandling = wrapWithErrorHandling(
     this,
