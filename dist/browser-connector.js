@@ -505,9 +505,13 @@
 	      var result = arguments[1];
 	      var callback = arguments[2];
 
-	      var processor = (0, _processQueryResults2.default)(_this._logging, _this.updateQueryTimes);
-	      var processResultsObject = processor(options, _this._datumEnum, result, callback);
-	      return processResultsObject;
+	      try {
+	        var processor = (0, _processQueryResults2.default)(_this._logging, _this.updateQueryTimes);
+	        var processResultsObject = processor(options, _this._datumEnum, result, callback);
+	        return processResultsObject;
+	      } catch (err) {
+	        throw err;
+	      }
 	    };
 
 	    // return this to allow chaining off of instantiation
@@ -26938,16 +26942,25 @@
 	        return;
 	      }
 
-	      if (result.row_set.is_columnar) {
-	        formattedResult = (0, _processColumnarResults2.default)(result.row_set, eliminateNullRows, _datumEnum);
-	      } else {
-	        formattedResult = (0, _processRowResults2.default)(result.row_set, eliminateNullRows, _datumEnum);
-	      }
+	      try {
+	        if (result.row_set.is_columnar) {
+	          formattedResult = (0, _processColumnarResults2.default)(result.row_set, eliminateNullRows, _datumEnum);
+	        } else {
+	          formattedResult = (0, _processRowResults2.default)(result.row_set, eliminateNullRows, _datumEnum);
+	        }
 
-	      formattedResult.timing = {
-	        execution_time_ms: result.execution_time_ms,
-	        total_time_ms: result.total_time_ms
-	      };
+	        formattedResult.timing = {
+	          execution_time_ms: result.execution_time_ms,
+	          total_time_ms: result.total_time_ms
+	        };
+	      } catch (err) {
+	        if (hasCallback) {
+	          callback(err);
+	        } else {
+	          throw err;
+	        }
+	        return;
+	      }
 
 	      if (hasCallback) {
 	        callback(null, options.returnTiming ? formattedResult : formattedResult.results);
@@ -27048,7 +27061,7 @@
 	              row[fieldName].push(data.columns[_c].data.arr_col[r].data.int_col[e] * oneThousandMilliseconds);
 	              break;
 	            default:
-	              break;
+	              throw new Error("Unrecognized array field type: " + fieldType);
 	          }
 	        }
 	      } else {
@@ -27074,8 +27087,14 @@
 	          case "DATE":
 	            row[fieldName] = new Date(data.columns[_c].data.int_col[r] * oneThousandMilliseconds);
 	            break;
-	          default:
+	          case "POINT":
+	          case "LINESTRING":
+	          case "POLYGON":
+	          case "MULTIPOLYGON":
+	            row[fieldName] = data.columns[_c].data.str_col[r];
 	            break;
+	          default:
+	            throw new Error("Unrecognized field type: " + fieldType);
 	        }
 	      }
 	    }
@@ -27176,7 +27195,7 @@
 	              row[fieldName].push(elemDatum.val.int_val * 1000); // eslint-disable-line no-magic-numbers
 	              break;
 	            default:
-	              break;
+	              throw new Error("Unrecognized array field type: " + fieldType);
 	          }
 	        }
 	      } else {
@@ -27207,8 +27226,14 @@
 	          case "DATE":
 	            row[fieldName] = new Date(scalarDatum.val.int_val * 1000); // eslint-disable-line no-magic-numbers
 	            break;
-	          default:
+	          case "POINT":
+	          case "LINESTRING":
+	          case "POLYGON":
+	          case "MULTIPOLYGON":
+	            row[fieldName] = scalarDatum.val.str_val;
 	            break;
+	          default:
+	            throw new Error("Unrecognized field type: " + fieldType);
 	        }
 	      }
 	    }

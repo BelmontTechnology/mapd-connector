@@ -56,17 +56,21 @@ class MapdCon {
     this.invertDatumTypes()
 
     this.processResults = (options = {}, result, callback) => {
-      const processor = processQueryResults(
-        this._logging,
-        this.updateQueryTimes
-      )
-      const processResultsObject = processor(
-        options,
-        this._datumEnum,
-        result,
-        callback
-      )
-      return processResultsObject
+      try {
+        const processor = processQueryResults(
+          this._logging,
+          this.updateQueryTimes
+        )
+        const processResultsObject = processor(
+          options,
+          this._datumEnum,
+          result,
+          callback
+        )
+        return processResultsObject
+      } catch (err) {
+        throw err
+      }
     }
 
     // return this to allow chaining off of instantiation
