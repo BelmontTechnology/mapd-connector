@@ -18141,20 +18141,23 @@ module.exports =
 
 /***/ }),
 /* 57 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	// for node-connector only => need to check if node is runtime if browser-connector is needed
+	var Thrift = __webpack_require__(52);
+
 	var convertObjectToThriftCopyParams = exports.convertObjectToThriftCopyParams = function convertObjectToThriftCopyParams(obj) {
-	  return new TCopyParams(obj);
+	  return new Thrift.TCopyParams(obj);
 	}; // eslint-disable-line no-undef
 
 	var mutateThriftRowDesc = exports.mutateThriftRowDesc = function mutateThriftRowDesc(rowDescArray, thriftRowDescArray) {
 	  rowDescArray.forEach(function (obj, i) {
-	    thriftRowDescArray[i].col_name = obj.clean_col_name;
+	    thriftRowDescArray[i].col_name = obj.col_name; // clean_col_name would probably be a built name from  "is_reserved_keyword": false, "src_name": "", "is_system": false, "is_physical": null
 	    thriftRowDescArray[i].col_type.encoding = obj.col_type.encoding;
 	    thriftRowDescArray[i].col_type.type = obj.col_type.type;
 	  });
